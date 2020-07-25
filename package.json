@@ -1,0 +1,22 @@
+{
+  "name": "demo-eth-tx",
+  "version": "0.1.0",
+  "description": "Ethereum transaction demo scripts",
+  "main": "compile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Ethereum",
+    "web3.js",
+    "ethers.js"
+  ],
+  "author": "Lucian Boca <lucian.boca@consensys.net>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "ethers": "^5.0.7",
+    "solc": "^0.6.12",
+    "web3": "^1.2.11"
+  }
+}
