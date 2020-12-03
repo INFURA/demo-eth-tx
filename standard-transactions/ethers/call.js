@@ -8,15 +8,9 @@ const { abi } = JSON.parse(fs.readFileSync('Demo.json'));
 async function main() {
   // Configuring the connection to an Ethereum node
   const network = 'rinkeby';
-  const provider = new ethers.providers.InfuraProvider(
-    network,
-    process.env.INFURA_PROJECT_ID
-  );
+  const provider = new ethers.providers.InfuraProvider(network, process.env.INFURA_PROJECT_ID);
   // Creating a signing account from a private key
-  const signer = new ethers.Wallet(
-    '0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122',
-    provider
-  );
+  const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider);
   // Creating a Contract instance connected to the signer
   const contract = new ethers.Contract(
     // Replace this with the address of your deployed contract

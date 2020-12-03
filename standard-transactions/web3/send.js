@@ -9,9 +9,7 @@ async function main() {
     )
   );
   // Creating a signing account from a private key
-  const signer = web3.eth.accounts.privateKeyToAccount(
-    '0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122'
-  );
+  const signer = web3.eth.accounts.privateKeyToAccount(process.env.SIGNER_PRIVATE_KEY);
   web3.eth.accounts.wallet.add(signer);
   // Creating the transaction object
   const tx = {
@@ -23,12 +21,10 @@ async function main() {
   tx.gas = await web3.eth.estimateGas(tx);
 
   // Sending the transaction to the network
-  const receipt = await web3.eth
-    .sendTransaction(tx)
-    .once('transactionHash', txhash => {
-      console.log(`Mining transaction ...`);
-      console.log(`https://${network}.etherscan.io/tx/${txhash}`);
-    });
+  const receipt = await web3.eth.sendTransaction(tx).once('transactionHash', txhash => {
+    console.log(`Mining transaction ...`);
+    console.log(`https://${network}.etherscan.io/tx/${txhash}`);
+  });
   // The transaction is now on chain!
   console.log(`Mined in block ${receipt.blockNumber}`);
 }
