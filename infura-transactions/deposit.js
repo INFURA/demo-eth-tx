@@ -20,8 +20,9 @@ async function main() {
   // Send Ether to the ITX deposit contract
   // ITX will register the deposit after 10 confirmations
   // and credit the gas tank associated with your signer address
+  // you can view your balance at any time by calling relay_getBalance
   const depositTx = await signer.sendTransaction({
-    // Rinkeby address of the ITX deposit contract
+    // Address of the ITX deposit contract
     to: '0x015C7C7A7D65bbdb117C573007219107BD7486f9',
     // The amount of ether you want to deposit in your ITX gas tank
     value: ethers.utils.parseUnits('0.1', 'ether'),

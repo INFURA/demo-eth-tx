@@ -5,41 +5,9 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const { abi } = JSON.parse(fs.readFileSync('Demo.json'));
 
-// This function signs a relay request using the signer's private key
-// Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId)) + (to + data + gas + chainId)))
-// Where (to + data + gas + chainId) represents the RLP encoded concatenation of these fields.
-async function signRequest(signer, tx) {
-  const relayTransactionHash = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ['address', 'bytes', 'uint', 'uint'],
-      [tx.to, tx.data, tx.gas, 4] // Rinkeby chainId is 4
-    )
-  );
-  return await signer.signMessage(ethers.utils.arrayify(relayTransactionHash));
-}
-
-const wait = milliseconds => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+const wait = (milliseconds) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
-
-// This function waits for an ITX job to be successfully mined
-async function waitTransaction(itx, relayTransactionHash) {
-  let mined = false;
-
-  while (!mined) {
-    const statusResponse = await itx.send('relay_getTransactionStatus', [relayTransactionHash]);
-
-    for (let i = 0; i < statusResponse.length; i++) {
-      const hashes = statusResponse[i];
-      const receipt = await itx.getTransactionReceipt(hashes['ethTxHash']);
-      if (receipt && receipt.confirmations && receipt.confirmations > 1) {
-        mined = true;
-        return receipt;
-      }
-    }
-    await wait(1000);
-  }
-}
 
 async function main() {
   // Make sure we're using the right network
@@ -55,10 +23,7 @@ async function main() {
   );
 
   // Create a signing account from a private key
-  const signer = new ethers.Wallet(
-    '0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122',
-    itx
-  );
+  const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, itx);
 
   // Create a contract interface
   const iface = new ethers.utils.Interface(abi);
@@ -73,20 +38,47 @@ async function main() {
     gas: '100000',
   };
 
-  // Sign the relay request
-  const signature = await signRequest(signer, tx);
+  // Sign a relay request using the signer's private key
+  // Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId)) + (to + data + gas + chainId)))
+  // Where (to + data + gas + chainId) represents the RLP encoded concatenation of these fields.
+  // ITX will check the from address of this signature and deduct balance according to the gas used by the transaction
+  const relayTransactionHash = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['address', 'bytes', 'uint', 'uint'],
+      [tx.to, tx.data, tx.gas, 4] // Rinkeby chainId is 4
+    )
+  );
+  const signature = await signer.signMessage(ethers.utils.arrayify(relayTransactionHash));
 
   // Relay the transaction through ITX
   const relayTransactionHash = await itx.send('relay_sendTransaction', [tx, signature]);
   console.log(`ITX relay transaction hash: ${relayTransactionHash}`);
 
   // Waiting for the corresponding Ethereum transaction to be mined
+  // We poll the relay_getTransactionStatus method for status updates
+  // ITX bumps the gas price of your transaction until it's mined,
+  // causing a new transaction hash to be created each time it happens.
+  // relay_getTransactionStatus returns a list of these transaction hashes
+  // which can then be used to poll Infura for their transaction receipts
   console.log('Waiting to be mined...');
-  const receipt = await waitTransaction(itx, relayTransactionHash);
+  while (true) {
+    // fetch the latest ethereum transaction hashes
+    const statusResponse = await itx.send('relay_getTransactionStatus', [relayTransactionHash]);
 
-  // The transaction is now on chain!
-  console.log(`Ethereum transaction hash: ${receipt.transactionHash}`);
-  console.log(`Mined in block ${receipt.blockNumber}`);
+    // check each of these hashes to see if their receipt exists and
+    // has confirmations
+    for (let i = 0; i < statusResponse.length; i++) {
+      const hashes = statusResponse[i];
+      const receipt = await itx.getTransactionReceipt(hashes['ethTxHash']);
+      if (receipt && receipt.confirmations && receipt.confirmations > 1) {
+        // The transaction is now on chain!
+        console.log(`Ethereum transaction hash: ${receipt.transactionHash}`);
+        console.log(`Mined in block ${receipt.blockNumber}`);
+        return;
+      }
+    }
+    await wait(1000);
+  }
 }
 
 require('dotenv').config();
