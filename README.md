@@ -10,7 +10,9 @@ Make sure to have [Node.js](https://nodejs.org/en/) 12+ installed and an [Infura
 cd demo-eth-tx/
 npm install
 # Add your Infura Project ID below
-echo 'INFURA_PROJECT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' > .env
+echo 'INFURA_PROJECT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' >> .env
+# We'll be using the rinkeby network for these demos
+echo 'ETHEREUM_NETWORK=rinkeby' >> .env
 ```
 
 ## Send a simple transaction
@@ -75,7 +77,7 @@ As soon as the deployment transaction is mined, the script will output the addre
 
 ### Contract interaction
 
-Now that the contract is deployed, you can interact with it. The scripts are configured to interact with an older, existing contract, but feel free to edit [this line](ethers/call.js#L23) of `ethers/call.js` or [this line](web3/call.js#L25) of `web3/call.js` and replace it with the address of your newly deployed contract.
+Now that the contract is deployed, you can interact with it. The scripts are configured to interact with an older, existing contract, but feel free to edit [this line](ethers/call.js#L25) of `ethers/call.js` or [this line](web3/call.js#L25) of `web3/call.js` and replace it with the address of your newly deployed contract.
 
 Now you can run:
 
