@@ -14,9 +14,7 @@ async function main() {
     )
   );
   // Creating a signing account from a private key
-  const signer = web3.eth.accounts.privateKeyToAccount(
-    '0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122'
-  );
+  const signer = web3.eth.accounts.privateKeyToAccount(process.env.SIGNER_PRIVATE_KEY);
   web3.eth.accounts.wallet.add(signer);
   // Creating a Contract instance
   const contract = new web3.eth.Contract(
