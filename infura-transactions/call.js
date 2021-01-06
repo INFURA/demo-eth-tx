@@ -42,13 +42,13 @@ async function main() {
   // Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId)) + (to + data + gas + chainId)))
   // Where (to + data + gas + chainId) represents the RLP encoded concatenation of these fields.
   // ITX will check the from address of this signature and deduct balance according to the gas used by the transaction
-  const relayTransactionHash = ethers.utils.keccak256(
+  const relayTransactionHashToSign = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       ['address', 'bytes', 'uint', 'uint'],
       [tx.to, tx.data, tx.gas, 4] // Rinkeby chainId is 4
     )
   );
-  const signature = await signer.signMessage(ethers.utils.arrayify(relayTransactionHash));
+  const signature = await signer.signMessage(ethers.utils.arrayify(relayTransactionHashToSign));
 
   // Relay the transaction through ITX
   const relayTransactionHash = await itx.send('relay_sendTransaction', [tx, signature]);
