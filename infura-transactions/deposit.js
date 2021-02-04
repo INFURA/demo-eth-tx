@@ -1,12 +1,6 @@
-const { ethers } = require('ethers');
+const { ethers } = require("ethers");
 
 async function main() {
-  // Make sure we're using the right network
-  if (process.env.ETHEREUM_NETWORK !== 'rinkeby') {
-    console.log('ITX currently only available on Rinkeby network');
-    process.exit(1);
-  }
-
   // Configure the ITX provider using your Infura credentials
   const itx = new ethers.providers.InfuraProvider(
     process.env.ETHEREUM_NETWORK,
@@ -23,12 +17,14 @@ async function main() {
   // you can view your balance at any time by calling relay_getBalance
   const depositTx = await signer.sendTransaction({
     // Address of the ITX deposit contract
-    to: '0x015C7C7A7D65bbdb117C573007219107BD7486f9',
+    to: "0x015C7C7A7D65bbdb117C573007219107BD7486f9",
     // The amount of ether you want to deposit in your ITX gas tank
-    value: ethers.utils.parseUnits('0.1', 'ether'),
+    value: ethers.utils.parseUnits("0.1", "ether"),
   });
-  console.log('Mining deposit transaction...');
-  console.log(`https://${process.env.ETHEREUM_NETWORK}.etherscan.io/tx/${depositTx.hash}`);
+  console.log("Mining deposit transaction...");
+  console.log(
+    `https://${process.env.ETHEREUM_NETWORK}.etherscan.io/tx/${depositTx.hash}`
+  );
 
   // Waiting for the transaction to be mined
   const receipt = await depositTx.wait();
@@ -37,5 +33,5 @@ async function main() {
   console.log(`Mined in block ${receipt.blockNumber}`);
 }
 
-require('dotenv').config();
+require("dotenv").config();
 main();

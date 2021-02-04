@@ -25,18 +25,9 @@ cd demo-eth-tx/
 npm install
 ```
 
-Now let's make sure your credentials are saved in a local `.env` file so the scripts can easily access them:
+We have already set up a `.env` file with a default Infura Project ID, Signer private key, and an Ethereum network (rinkeby). The account is already pre-funded to send transactions on ITX.
 
-```bash
-# Add your Infura Project ID below
-echo 'INFURA_PROJECT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' >> .env
-
-# Add your signer private key below
-echo 'SIGNER_PRIVATE_KEY=0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' >> .env
-
-# We'll be using the rinkeby network for these demos
-echo 'ETHEREUM_NETWORK=rinkeby' >> .env
-```
+> If you run into issues such as "Insufficient Balance" please notify us or try to top it up yourself :)
 
 ## Check your ITX balance
 

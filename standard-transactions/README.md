@@ -9,15 +9,13 @@ Make sure to have [Node.js](https://nodejs.org/en/) 12+ installed and an [Infura
 ```bash
 cd demo-eth-tx/
 npm install
-# Add your Infura Project ID below
-echo 'INFURA_PROJECT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' > .env
 ```
+
+We have already supplied a default configuration in `.env` that includes an Infura ID, a private signing key (Buidler), a demo contract and a default network (rinkeby). Be kind and don't drain the wallets so other people can use them as well to test their apps. 😊
 
 ## Send a simple transaction
 
-Let's test we can send a small amount of Ether between two accounts.
-
-> These scripts are pre-configured to use the default [Buidler](https://buidler.dev/) private keys. Be kind and don't drain the wallets so other people can use them as well to test their apps. 😊
+Let's first test how we can send a small amount of Ether between two accounts.
 
 You can find a script for doing this using the `ethers.js` library in the `ethers/send.js` file. Run it and wait for the transaction to be mined:
 
