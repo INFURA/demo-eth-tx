@@ -71,16 +71,18 @@ async function main() {
     data: iface.encodeFunctionData("echo", [`Hello world at ${Date.now()}!`]),
     // An upper limit on the gas we're willing to spend
     gas: "50000",
+    // "fast" and "slow" supported.
+    schedule: "fast",
   };
 
   // Sign a relay request using the signer's private key
-  // Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId)) + (to + data + gas + chainId)))
-  // Where (to + data + gas + chainId) represents the RLP encoded concatenation of these fields.
+  // Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId + schedule)) + (to + data + gas + chainId + schedule)))
+  // Where (to + data + gas + chainId + schedule) represents the RLP encoded concatenation of these fields.
   // ITX will check the from address of this signature and deduct balance according to the gas used by the transaction
   const relayTransactionHashToSign = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["address", "bytes", "uint", "uint"],
-      [tx.to, tx.data, tx.gas, getChainID()]
+      ["address", "bytes", "uint", "uint", "string"],
+      [tx.to, tx.data, tx.gas, getChainID(), tx.schedule]
     )
   );
   const signature = await signer.signMessage(
@@ -89,7 +91,10 @@ async function main() {
 
   // Relay the transaction through ITX
   const sentAtBlock = await itx.getBlockNumber(); // Stats
-  const relayTransactionHash = await itx.send("relay_sendTransaction", [
+
+  // fetches an object
+  // { relayTransactionHash: string }
+  const { relayTransactionHash } = await itx.send("relay_sendTransaction", [
     tx,
     signature,
   ]);
@@ -103,25 +108,29 @@ async function main() {
   // which can then be used to poll Infura for their transaction receipts
   console.log("Waiting to be mined...");
   while (true) {
-    // fetch the latest ethereum transaction hashes
-    const statusResponse = await itx.send("relay_getTransactionStatus", [
-      relayTransactionHash,
-    ]);
+    // fetches an object
+    // { receivedTime: string, broadcasts?: [{broadcastTime: string, ethTxHash: string, gasPrice: string}]}
+    const {
+      receivedTime,
+      broadcasts,
+    } = await itx.send("relay_getTransactionStatus", [relayTransactionHash]);
 
     // check each of these hashes to see if their receipt exists and
     // has confirmations
-    for (let i = 0; i < statusResponse.length; i++) {
-      const hashes = statusResponse[i];
-      const receipt = await itx.getTransactionReceipt(hashes["ethTxHash"]);
-      printBump(hashes["ethTxHash"], hashes["gasPrice"]); // Print bump
+    if (broadcasts) {
+      for (const broadcast of broadcasts) {
+        const { broadcastTime, ethTxHash, gasPrice } = broadcast;
+        const receipt = await itx.getTransactionReceipt(ethTxHash);
+        printBump(ethTxHash, gasPrice); // Print bump
 
-      if (receipt && receipt.confirmations && receipt.confirmations > 1) {
-        // The transaction is now on chain!
-        console.log(`Ethereum transaction hash: ${receipt.transactionHash}`);
-        console.log(`Sent at block ${sentAtBlock}`);
-        console.log(`Mined in block ${receipt.blockNumber}`);
-        console.log(`Total blocks ${receipt.blockNumber - sentAtBlock}`);
-        return;
+        if (receipt && receipt.confirmations && receipt.confirmations > 1) {
+          // The transaction is now on chain!
+          console.log(`Ethereum transaction hash: ${receipt.transactionHash}`);
+          console.log(`Sent at block ${sentAtBlock}`);
+          console.log(`Mined in block ${receipt.blockNumber}`);
+          console.log(`Total blocks ${receipt.blockNumber - sentAtBlock}`);
+          return;
+        }
       }
     }
     await wait(1000);
