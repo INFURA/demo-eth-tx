@@ -77,7 +77,7 @@ async function main() {
 
   // Sign a relay request using the signer's private key
   // Final signature of the form keccak256("\x19Ethereum Signed Message:\n" + len((to + data + gas + chainId + schedule)) + (to + data + gas + chainId + schedule)))
-  // Where (to + data + gas + chainId + schedule) represents the RLP encoded concatenation of these fields.
+  // Where (to + data + gas + chainId + schedule) represents the ABI argument encoding of these fields.
   // ITX will check the from address of this signature and deduct balance according to the gas used by the transaction
   const relayTransactionHashToSign = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
