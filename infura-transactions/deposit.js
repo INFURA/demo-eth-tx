@@ -17,9 +17,9 @@ async function main() {
   // you can view your balance at any time by calling relay_getBalance
   const depositTx = await signer.sendTransaction({
     // Address of the ITX deposit contract
-    to: "0x015C7C7A7D65bbdb117C573007219107BD7486f9",
+    to:"0x972aF4d227A29642aA993741f4718d463569E4b3",
     // The amount of ether you want to deposit in your ITX gas tank
-    value: ethers.utils.parseUnits("0.1", "ether"),
+    value: ethers.utils.parseUnits("1.0", "ether"),
   });
   console.log("Mining deposit transaction...");
   console.log(
